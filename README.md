@@ -41,7 +41,5 @@ A Chrome extension that automates alumni outreach by scraping alumni data and se
 
 - Muhammad Abdullah Goher
 - Alan Wu
-
-## License
-
-MIT
+- Adi Sirohi
+- Caia Gelli
