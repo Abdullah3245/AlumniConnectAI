@@ -1,0 +1,21 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+    color: #665687;
+  }
+  
+  button {
+    background-color: #abedc6;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
