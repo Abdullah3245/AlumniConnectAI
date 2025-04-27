@@ -5,17 +5,18 @@
     gap: 1rem;
   }
   
-  h1 {
-    font-size: 1.5rem;
-    color: #665687;
+  html, body {
+    width: 300px;
+    height: 350px;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #ABEDC6;
   }
   
-  button {
-    background-color: #abedc6;
-    border: none;
-    padding: 0.75rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
+  #root {
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    gap: 1rem;
   }
-  
