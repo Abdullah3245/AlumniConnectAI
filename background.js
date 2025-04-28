@@ -37,3 +37,5 @@ async function getAIOverview(query) {
         };
     }
 }
+
+module.exports = { getAIOverview }; // Change to CommonJS export
