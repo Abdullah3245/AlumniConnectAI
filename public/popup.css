@@ -1,0 +1,22 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+  }
+  
+  html, body {
+    width: 300px;
+    height: 350px;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #ABEDC6;
+  }
+  
+  #root {
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    gap: 1rem;
+  }
