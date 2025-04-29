@@ -62,5 +62,4 @@
     // 6. Final console logs for debugging
     console.log('=== Full Scraped Result ===');
     console.log(fullScrapeResult);
-  })();
-  
+  })(); 
