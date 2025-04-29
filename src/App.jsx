@@ -1,5 +1,5 @@
 // Project: AlumniConnectAI
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import './App.css';
 
 function App() {
@@ -7,6 +7,19 @@ function App() {
   const [showToast, setShowToast] = useState(false);
   const [alumName, setAlum]   = useState("");
   const [promptText, setPromptText] = useState("");
+
+  const [resumeFile, setResumeFile] = useState(null);
+  const [resumeName, setResumeName] = useState("");
+  const fileRef = useRef(null);
+
+  const [alumSet, setAlumSet] = useState(() => {
+    const stored = localStorage.getItem("scrapedAlums");
+    return new Set(stored ? JSON.parse(stored) : []);
+  });
+
+  useEffect(() => {
+    localStorage.setItem("scrapedAlums", JSON.stringify(Array.from(alumSet)));
+  }, [alumSet]);
 
   const handleScrape = async () => {
     setShowToast(true);
@@ -16,7 +29,13 @@ function App() {
       setTimeout(() => r("John Cena"), 1200)
     );
 
-    setAlum(scrapedName);      // fill the text box
+    setAlum(scrapedName);    
+    setAlumSet(prev => {
+      const next = new Set(prev);
+      next.add(scrapedName);
+      return next;
+    });
+
     setTimeout(() => setShowToast(false), 1500);
   };
 
@@ -29,9 +48,6 @@ function App() {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(promptText);
-      // brief “copied!” toast
-      setToast(true);
-      setTimeout(() => setToast(false), 1200);
     } catch (err) {
       console.error("Copy failed:", err);
     }
@@ -40,6 +56,13 @@ function App() {
   const handleClear = () => {
     setPromptText("");
     setAlum("");
+  };
+
+  const handleUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setResumeFile(file);
+    setResumeName(file.name);
   };
 
   return (
@@ -64,6 +87,26 @@ function App() {
 
       {/* Scrape + Alum field */}
       <div className="controls">
+
+        {/* === Upload resume section ====================== */}
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".pdf"
+          onChange={handleUpload}
+          style={{ display: "none" }}
+        />
+
+        <button
+          type="button"
+          className="resume-btn"
+          onClick={() => fileRef.current?.click()}
+        >
+          Upload&nbsp;Resume
+        </button>
+
+        {resumeName && <div className="file-name">📄 {resumeName}</div>}
+
         <button className="scrape-btn" onClick={handleScrape}>🗘 Scrape</button>
 
         {/* Toast */}
@@ -76,8 +119,7 @@ function App() {
             type="text"
             placeholder="Name will appear here"
             readOnly
-            value={alumName}
-            
+            value={alumName}           
           />
         </label>
 
@@ -103,11 +145,11 @@ function App() {
 
       {/* ─── Sidebar ───────────────────────────────────────────── */}
       <aside className={`sidebar ${open ? "open" : ""}`}>
-        <h3>Temp</h3>
+        <h3>Scraped Alumni</h3>
         <ul>
-          <li>temp1</li>
-          <li>temp2</li>
-          <li>temp3</li>
+        {Array.from(alumSet).map(name => (
+          <li key={name}>{name}</li>
+        ))}
         </ul>
       </aside>
     </div>
