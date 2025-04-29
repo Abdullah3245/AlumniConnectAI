@@ -8,21 +8,22 @@
     "*://*.upenn.edu/*"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
- "action": {
+  "action": {
     "default_popup": "popup.html",
     "default_icon": "assets/AlumniConnectIcon.png"
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"]
+      "js": ["webscraper.js"]
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["popup.html"],
+      "resources": ["popup.html", "popup.js", "popup.css"],
       "matches": ["<all_urls>"]
     }
   ],
