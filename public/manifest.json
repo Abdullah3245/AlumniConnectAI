@@ -15,7 +15,6 @@
   "action": {
     "default_popup": "popup.html",
     "default_icon": "assets/AlumniConnectIcon.png"
-    
   },
   "background": {
     "service_worker": "background.js"
