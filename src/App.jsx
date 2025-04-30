@@ -160,8 +160,6 @@ function App() {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(promptText);
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 1200);
     } catch (err) {
       console.error("Copy failed:", err);
     }
