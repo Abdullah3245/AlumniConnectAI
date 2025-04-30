@@ -161,7 +161,7 @@ function App() {
           Upload&nbsp;Resume
         </button>
 
-        // resume name preview for user
+        {/* resume name preview for user */}
         {resumeName && <div className="file-name">📄 {resumeName}</div>}
 
         {/* === Scrape alumni section ====================== */}
