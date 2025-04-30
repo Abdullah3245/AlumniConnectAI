@@ -4,38 +4,34 @@ import './App.css';
 
 // Function to call SerpAPI for Google AI Overview
 async function getAIOverview(query) {
-    const apiKey = 'YOUR_API_KEY'; // Replace with your actual API key
-    const endpoint = `https://serpapi.com/search?engine=google_ai_overview&q=${encodeURIComponent(query)}&api_key=${apiKey}`;
+  const apiKey = "217ae030d8810a6b3e56970071c780b18a767d787904c59c84fe63d712fe5222";
 
-    try {
-        const response = await fetch(endpoint);
-        
-        if (!response.ok) {
-            const errorDetails = await response.json();
-            throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorDetails.error}`);
-        }
-
-        const data = await response.json();
-        
-        if (!data.ai_overview) {
-            throw new Error('AI Overview data not available in the response.');
-        }
-
-        const aiOverview = data.ai_overview;
-        const insights = aiOverview.text_blocks.map(block => block.snippet).join('\n');
-
-        return {
-            success: true,
-            insights: insights,
-            rawData: aiOverview
-        };
-    } catch (error) {
-        console.error('Error fetching data from SerpAPI:', error);
-        return {
-            success: false,
-            message: error.message
-        };
-    }
+  return new Promise((resolve, reject) => {
+      fetch(`https://serpapi.com/search?q=${encodeURIComponent(query)}&api_key=${apiKey}`)
+          .then(response => response.json())
+          .then(json => {
+              const token = json["ai_overview"]["page_token"];
+              const endpoint = `https://serpapi.com/search?engine=google_ai_overview&q=${encodeURIComponent(query)}&api_key=${apiKey}&page_token=${token}`;
+              
+              fetch(endpoint)
+                  .then(response => response.json())
+                  .then(data => {
+                      const textBlocks = data["ai_overview"]["text_blocks"];
+                      const extractedText = textBlocks.map(block => {
+                          if (block.type === "paragraph") {
+                              return block.snippet;
+                          } else if (block.type === "list") {
+                              return block.list.map(item => item.snippet).join('\n');
+                          }
+                          return '';
+                      }).filter(text => text !== '').join('\n\n');
+                      
+                      resolve(extractedText);
+                  })
+                  .catch(error => reject(error));
+          })
+          .catch(error => reject(error));
+  });
 }
 
 function App() {
