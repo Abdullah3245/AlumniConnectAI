@@ -4,7 +4,7 @@ import './App.css';
 
 // Function to call SerpAPI for Google AI Overview
 async function getAIOverview(query) {
-  const apiKey = "217ae030d8810a6b3e56970071c780b18a767d787904c59c84fe63d712fe5222";
+  const apiKey = "API KEY";
 
   return new Promise((resolve, reject) => {
       fetch(`https://serpapi.com/search?q=${encodeURIComponent(query)}&api_key=${apiKey}`)
