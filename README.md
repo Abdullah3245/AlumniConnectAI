@@ -43,3 +43,6 @@ A Chrome extension that automates alumni outreach by scraping alumni data and se
 - Alan Wu
 - Adi Sirohi
 - Caia Gelli
+
+  ## Landing Page
+  https://chrome-glow-landing.lovable.app/
