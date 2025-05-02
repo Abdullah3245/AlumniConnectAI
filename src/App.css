@@ -97,6 +97,12 @@ body {
   color: #665687;
 }
 
+.file-name {
+  font-size: 0.5rem;
+  color: #190933;
+  margin-top: 0.1rem;
+}
+
 /* scrape butt */
 .scrape-btn {
   align-self: center;  
@@ -115,6 +121,25 @@ body {
 
 .scrape-btn:hover {
   background: #D14F76;
+}
+
+/* resume butt */
+.resume-btn {
+  display: flex; 
+  padding: 0.2rem 1rem;
+  font-size: 0.5rem;
+  font-weight: 600;
+  color: #190933;
+  background: #f7e7eb;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.resume-btn:hover {
+  background: #a69c9f;
 }
 
 .controls {

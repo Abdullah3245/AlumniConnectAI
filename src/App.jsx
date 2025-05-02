@@ -1,5 +1,5 @@
 // Project: AlumniConnectAI
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import './App.css';
 
 // Function to call SerpAPI for Google AI Overview
@@ -41,6 +41,22 @@ function App() {
   const [promptText, setPromptText] = useState("");
   const [scrapedData, setScrapedData] = useState(null);
   const [aiOverview, setAIOverview] = useState(null);
+
+  const [resumeFile, setResumeFile] = useState(null);
+  const [resumeName, setResumeName] = useState("");
+  const fileRef = useRef(null);
+  // for later
+  const [tab, setTab] = useState<"alums" | "resumes">("alums");
+
+  const [alumSet, setAlumSet] = useState(() => {
+    const stored = localStorage.getItem("scrapedAlums");
+    return new Set(stored ? JSON.parse(stored) : []);
+  });
+  
+
+  useEffect(() => {
+    localStorage.setItem("scrapedAlums", JSON.stringify(Array.from(alumSet)));
+  }, [alumSet]);
 
   const handleScrape = async () => {
     setShowToast(true);
@@ -135,17 +151,17 @@ function App() {
     const prompt = `Alum: ${alumName}\nTitle: ${scrapedData.profile.title}\nEmployer: ${scrapedData.profile.employer}\nLocation: ${scrapedData.profile.location}\n\nAI Insights: ${aiOverview?.insights || 'No AI insights available'}`;
     setPromptText(prompt);
   };
+  
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(promptText);
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 1200);
     } catch (err) {
       console.error("Copy failed:", err);
     }
   };
 
+  // CLEAR BUTTON
   const handleClear = () => {
     setPromptText("");
     setAlum("");
@@ -153,6 +169,26 @@ function App() {
     setAIOverview(null);
     localStorage.removeItem('fullScrapeResult');
     localStorage.removeItem('aiOverview');
+  };
+
+  const handleUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setResumeFile(file);
+    setResumeName(file.name);
+
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const content = reader.result;
+      chrome.storage.local.get(["resumeList"], (result) => {
+        const oldList = result.resumeList || [];
+        const newEntry = { name: file.name, content };
+        chrome.storage.local.set({ resumeList: [...oldList, newEntry] });
+      });
+    };
+    reader.readAsText(file);
   };
 
   // Load saved data on component mount
@@ -193,11 +229,34 @@ function App() {
 
       {/* Scrape + Alum field */}
       <div className="controls">
+
+        {/* === Upload resume section ====================== */}
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".pdf"
+          onChange={handleUpload}
+          style={{ display: "none" }}
+        />
+
+        <button
+          type="button"
+          className="resume-btn"
+          onClick={() => fileRef.current?.click()}
+        >
+          Upload&nbsp;Resume
+        </button>
+
+        {/* resume name preview for user */}
+        {resumeName && <div className="file-name">📄 {resumeName}</div>}
+
+        {/* === Scrape alumni section ====================== */}
         <button className="scrape-btn" onClick={handleScrape}>🗘 Scrape</button>
 
         {/* Toast */}
         {showToast && <div className="toast">Scraping…</div>}  
 
+        {/* === Alum name field ====================== */}
         <label className="alum-label">
           Alum
           <input
@@ -205,11 +264,11 @@ function App() {
             type="text"
             placeholder="Name will appear here"
             readOnly
-            value={alumName}
-            
+            value={alumName}           
           />
         </label>
 
+        {/* === Generate + Copy buttons ====================== */}
         <div className="actions">
           <button className="gen-btn" onClick={handleGenerate}>Generate</button>
           <button className="copy-btn" onClick={handleCopy}>Copy</button>
@@ -223,21 +282,27 @@ function App() {
         placeholder="Prompt will appear here..."
         />
 
+        {/* === Clear button ====================== */}
         <div className="clear">
           <button className="clear-btn" onClick={handleClear}>Clear</button>
         </div>
-
       </div>
             
-
       {/* ─── Sidebar ───────────────────────────────────────────── */}
       <aside className={`sidebar ${open ? "open" : ""}`}>
-        <h3>Temp</h3>
+        <h3>Scraped Alumni</h3>
         <ul>
-          <li>temp1</li>
-          <li>temp2</li>
-          <li>temp3</li>
+        {Array.from(alumSet).map(name => (
+          <li key={name}>{name}</li>
+        ))}
         </ul>
+
+        {/* later do this: expanding use of sidebar */}
+
+        {/* <div className="flex space-x-4 p-2">
+          <button onClick={() => setTab("alums")} className={tab === "alums" ? "font-bold" : ""}>Scraped Alums</button>
+          <button onClick={() => setTab("resumes")} className={tab === "resumes" ? "font-bold" : ""}>Past Resumes</button>
+        </div> */}
       </aside>
     </div>
   );
