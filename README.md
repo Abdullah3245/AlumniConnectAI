@@ -13,9 +13,12 @@ A Chrome extension that automates alumni outreach by scraping alumni data and se
 ## Installation
 
 1. Clone this repository locally
-2. Open Chrome and go to `chrome://extensions/`
-3. Enable "Developer mode"
-4. Click "Load unpacked" and select dist folder in the extension directory
+2. cd to local clone
+3. Execute npm install in terminal
+4. Still in terminal, execute npm run build 
+5. Open Chrome and go to `chrome://extensions/`
+6. Enable "Developer mode"
+7. Click "Load unpacked" and select dist folder in the extension directory
 
 ## Usage
 
