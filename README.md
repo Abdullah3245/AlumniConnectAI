@@ -46,3 +46,4 @@ A Chrome extension that automates alumni outreach by scraping alumni data and se
 
   ## Landing Page
   https://chrome-glow-landing.lovable.app/
+  https://github.com/CaiaG/AlumniConnectAiLandingPage
