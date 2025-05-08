@@ -1,36 +1,37 @@
 // Project: AlumniConnectAI
 import { useState, useEffect, useRef } from "react";
 import './App.css';
+import WebScraper from "../public/webscraper";
 
 // Function to call SerpAPI for Google AI Overview
 async function getAIOverview(query) {
   const apiKey = "API KEY";
 
   return new Promise((resolve, reject) => {
-      fetch(`https://serpapi.com/search?q=${encodeURIComponent(query)}&api_key=${apiKey}`)
+    fetch(`https://serpapi.com/search?q=${encodeURIComponent(query)}&api_key=${apiKey}`)
+      .then(response => response.json())
+      .then(json => {
+        const token = json["ai_overview"]["page_token"];
+        const endpoint = `https://serpapi.com/search?engine=google_ai_overview&q=${encodeURIComponent(query)}&api_key=${apiKey}&page_token=${token}`;
+
+        fetch(endpoint)
           .then(response => response.json())
-          .then(json => {
-              const token = json["ai_overview"]["page_token"];
-              const endpoint = `https://serpapi.com/search?engine=google_ai_overview&q=${encodeURIComponent(query)}&api_key=${apiKey}&page_token=${token}`;
-              
-              fetch(endpoint)
-                  .then(response => response.json())
-                  .then(data => {
-                      const textBlocks = data["ai_overview"]["text_blocks"];
-                      const extractedText = textBlocks.map(block => {
-                          if (block.type === "paragraph") {
-                              return block.snippet;
-                          } else if (block.type === "list") {
-                              return block.list.map(item => item.snippet).join('\n');
-                          }
-                          return '';
-                      }).filter(text => text !== '').join('\n\n');
-                      
-                      resolve(extractedText);
-                  })
-                  .catch(error => reject(error));
+          .then(data => {
+            const textBlocks = data["ai_overview"]["text_blocks"];
+            const extractedText = textBlocks.map(block => {
+              if (block.type === "paragraph") {
+                return block.snippet;
+              } else if (block.type === "list") {
+                return block.list.map(item => item.snippet).join('\n');
+              }
+              return '';
+            }).filter(text => text !== '').join('\n\n');
+
+            resolve(extractedText);
           })
           .catch(error => reject(error));
+      })
+      .catch(error => reject(error));
   });
 }
 
@@ -46,17 +47,19 @@ function App() {
   const [resumeName, setResumeName] = useState("");
   const fileRef = useRef(null);
   // for later
-  const [tab, setTab] = useState<"alums" | "resumes">("alums");
+  const [tab, setTab] = useState < "alums" | "resumes" > ("alums");
 
-  const [alumSet, setAlumSet] = useState(() => {
+  const [alumMap, setAlumMap] = useState(() => {
     const stored = localStorage.getItem("scrapedAlums");
-    return new Set(stored ? JSON.parse(stored) : []);
+    return stored ? JSON.parse(stored) : {};
   });
-  
+
+
 
   useEffect(() => {
-    localStorage.setItem("scrapedAlums", JSON.stringify(Array.from(alumSet)));
-  }, [alumSet]);
+    localStorage.setItem("scrapedAlums", JSON.stringify(alumMap));
+  }, [alumMap]);
+
 
   const handleScrape = async () => {
     setShowToast(true);
@@ -64,14 +67,14 @@ function App() {
     try {
       // Execute the scraping script in the active tab
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      
+
       const results = await chrome.scripting.executeScript({
         target: { tabId: tab.id },
         func: () => {
           // Helper: safely get text from a selector
           const getText = (selector) =>
             document.querySelector(selector)?.textContent.trim() ?? '(not found)';
-        
+
           // 1. Scrape Profile Info
           const profile = {
             name: getText('lightning-formatted-name.profileHeaderName'),
@@ -80,44 +83,44 @@ function App() {
             title: getText('lightning-formatted-text.profileHeaderTitle'),
             location: getText('lightning-formatted-text.profileHeaderCity'),
           };
-        
+
           // 2. Scrape Emails
           const emails = [...document.querySelectorAll('a[href^="mailto:"]')]
             .map(link => link.href.replace('mailto:', '').trim());
-        
+
           // 3. Scrape Academic Information
           const academicData = [];
           const validSchoolKeywords = [
             "School", "Wharton", "Engineering", "Nursing", "Law", "Education",
             "Medicine", "Social Policy", "Design", "Dental", "Veterinary"
           ];
-        
+
           const tiles = document.querySelectorAll('article.rlt-card');
-        
+
           tiles.forEach(tile => {
             const schoolName = tile.querySelector('h3 span[part="formatted-rich-text"]')?.textContent.trim() ?? '';
-        
+
             if (!validSchoolKeywords.some(keyword => schoolName.includes(keyword))) {
               return; // Skip non-education cards
             }
-        
+
             const fields = tile.querySelectorAll('dl dt.slds-item_label');
             const values = tile.querySelectorAll('dl dd.slds-item_detail');
-        
+
             const entry = { school: schoolName };
-        
+
             fields.forEach((field, idx) => {
               const label = field?.innerText.trim().replace(':', '') ?? '';
               const value = values[idx]?.innerText.trim() ?? '';
-        
+
               if (label && value) {
                 entry[label] = value;
               }
             });
-        
+
             academicData.push(entry);
           });
-        
+
           return {
             profile,
             emails,
@@ -128,6 +131,10 @@ function App() {
 
       const scrapedData = results[0].result;
       setScrapedData(scrapedData);
+      setAlumMap(prev => ({
+        ...prev,
+        [scrapedData.profile.name]: scrapedData
+      }));
       setAlum(scrapedData.profile.name);
 
       // Get AI overview for the job title
@@ -148,10 +155,51 @@ function App() {
   const handleGenerate = () => {
     if (!scrapedData) return;
 
-    const prompt = `Alum: ${alumName}\nTitle: ${scrapedData.profile.title}\nEmployer: ${scrapedData.profile.employer}\nLocation: ${scrapedData.profile.location}\n\nAI Insights: ${aiOverview?.insights || 'No AI insights available'}`;
+    const { profile, emails, academic } = scrapedData;
+
+    let prompt = `Alum: ${profile.name}\n`;
+
+    if (profile?.title && profile.title !== '(not found)') {
+      prompt += `Title: ${profile.title}\n`;
+    }
+
+    if (profile?.employer && profile.employer !== '(not found)') {
+      prompt += `Employer: ${profile.employer}\n`;
+    }
+
+    if (profile?.location && profile.location !== '(not found)') {
+      prompt += `Location: ${profile.location}\n`;
+    }
+
+    if (emails?.length) {
+      prompt += `Emails: ${emails.join(', ')}\n`;
+    }
+
+    if (academic?.length) {
+      prompt += `\nAcademic Background:\n`;
+      academic.forEach((entry, i) => {
+        prompt += `School ${i + 1}: ${entry.school}\n`;
+        if (entry['Class Year']) {
+          prompt += `Class Year: ${entry['Class Year']}\n`;
+        }
+        if (entry['Degree']) {
+          prompt += `Degree: ${entry['Degree']}\n`;
+        }
+        if (entry['Major(s)']) {
+          prompt += `Major(s): ${entry['Major(s)']}\n`;
+        }
+        if (entry['Minor(s)']) {
+          prompt += `Minor(s): ${entry['Minor(s)']}\n`;
+        }
+        prompt += `\n`;
+      });
+    }
+
+    prompt += `AI Insights: ${aiOverview?.insights || 'No AI insights available'}`;
+
     setPromptText(prompt);
   };
-  
+
 
   const handleCopy = async () => {
     try {
@@ -195,13 +243,13 @@ function App() {
   useEffect(() => {
     const savedData = localStorage.getItem('fullScrapeResult');
     const savedAIOverview = localStorage.getItem('aiOverview');
-    
+
     if (savedData) {
       const parsedData = JSON.parse(savedData);
       setScrapedData(parsedData);
       setAlum(parsedData.profile.name);
     }
-    
+
     if (savedAIOverview) {
       setAIOverview(JSON.parse(savedAIOverview));
     }
@@ -254,7 +302,7 @@ function App() {
         <button className="scrape-btn" onClick={handleScrape}>🗘 Scrape</button>
 
         {/* Toast */}
-        {showToast && <div className="toast">Scraping…</div>}  
+        {showToast && <div className="toast">Scraping…</div>}
 
         {/* === Alum name field ====================== */}
         <label className="alum-label">
@@ -264,7 +312,7 @@ function App() {
             type="text"
             placeholder="Name will appear here"
             readOnly
-            value={alumName}           
+            value={alumName}
           />
         </label>
 
@@ -276,10 +324,10 @@ function App() {
 
         {/* new rectangle */}
         <textarea
-        className="prompt-box"
-        value={promptText}
-        readOnly
-        placeholder="Prompt will appear here..."
+          className="prompt-box"
+          value={promptText}
+          readOnly
+          placeholder="Prompt will appear here..."
         />
 
         {/* === Clear button ====================== */}
@@ -287,14 +335,26 @@ function App() {
           <button className="clear-btn" onClick={handleClear}>Clear</button>
         </div>
       </div>
-            
+
       {/* ─── Sidebar ───────────────────────────────────────────── */}
       <aside className={`sidebar ${open ? "open" : ""}`}>
         <h3>Scraped Alumni</h3>
         <ul>
-        {Array.from(alumSet).map(name => (
-          <li key={name}>{name}</li>
-        ))}
+          {Object.keys(alumMap).map(name => (
+            <li key={name}>
+              <button
+                className="alum-button"
+                onClick={() => {
+                  setAlum(name);
+                  setScrapedData(alumMap[name]);
+                  setPromptText("");
+                  setAIOverview(null); // Optional: reset insights for that alum
+                }}
+              >
+                {name}
+              </button>
+            </li>
+          ))}
         </ul>
 
         {/* later do this: expanding use of sidebar */}
