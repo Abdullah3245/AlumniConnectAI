@@ -9,7 +9,7 @@ AlumniConnectAI is a Chrome extension designed to streamline the process of cold
 - ✂️ **Automated Scraping**: Scrape all relevant information about an alum with the click of a button
 - 🧠 **AI Insights**: Pulls additional AI insights from across the internet
 - 📝 **Resume Upload**: Upload your resume to further tailor prompts
-- 📝 **Prompt Generation**: Instantly generate LLM prompts to make the perfect cold email
+- 📨 **Prompt Generation**: Instantly generate LLM prompts to make the perfect cold email
 
 ---
 
