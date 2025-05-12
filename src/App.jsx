@@ -196,7 +196,7 @@ function App() {
 
     // 4. AI Insights (optional)
     if (aiOverview?.length) {
-      prompt += `\nAI Insights: ${aiOverview.join('; ')}`;
+      prompt += `\nHere's some additional info about their job: ${aiOverview.join('; ')}`;
     }
 
     setPromptText(prompt);
