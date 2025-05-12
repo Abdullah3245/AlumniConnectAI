@@ -1,7 +1,6 @@
 // Project: AlumniConnectAI
 import { useState, useEffect, useRef } from "react";
 import './App.css';
-import WebScraper from "../public/webscraper";
 
 function App() {
   const [open, setOpen] = useState(false);
@@ -225,17 +224,19 @@ function App() {
     setResumeFile(file);
     setResumeName(file.name);
 
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const content = reader.result;
-      chrome.storage.local.get(["resumeList"], (result) => {
-        const oldList = result.resumeList || [];
-        const newEntry = { name: file.name, content };
-        chrome.storage.local.set({ resumeList: [...oldList, newEntry] });
-      });
-    };
-    reader.readAsText(file);
+    // Call the resume parser!
+    if (window.parseResume) {
+      window.parseResume(file)
+        .then(() => {
+          // Optionally, you can show a toast or update state here
+          console.log('Resume parsed and saved to localStorage');
+        })
+        .catch((err) => {
+          console.error('Failed to parse resume:', err);
+        });
+    } else {
+      console.error('parseResume function not found on window');
+    }
   };
 
   // Load saved data on component mount

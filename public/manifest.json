@@ -7,12 +7,10 @@
     "storage",
     "activeTab",
     "scripting",
-    "tabs",
-    "fileSystem"
+    "tabs"
   ],
   "host_permissions": [
-    "*://*.upenn.edu/*",
-    "https://cdnjs.cloudflare.com/*"
+    "*://*.upenn.edu/*"
   ],
   "background": {
     "service_worker": "background.js",
@@ -20,16 +18,22 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_icon": "assets/AlumniConnectIcon.png"
+    "default_icon": {
+      "16": "assets/AlumniConnectIcon.png",
+      "48": "assets/AlumniConnectIcon.png",
+      "128": "assets/AlumniConnectIcon.png"
+    }
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
       "js": [
-        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
+        "pdf.min.js",
+        "pdf.worker.min.js",
         "webscraper.js",
         "parseResume.js"
-      ]
+      ],
+      "run_at": "document_idle"
     }
   ],
   "web_accessible_resources": [
@@ -39,7 +43,9 @@
         "popup.js",
         "popup.css",
         "config.js",
-        "parseResume.js"
+        "parseResume.js",
+        "pdf.min.js",
+        "pdf.worker.min.js"
       ],
       "matches": ["<all_urls>"]
     }
