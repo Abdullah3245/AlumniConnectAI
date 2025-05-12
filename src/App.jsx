@@ -125,21 +125,24 @@ function App() {
     const { profile, emails, academic } = scrapedData;
     const resumeData = JSON.parse(localStorage.getItem('resumeParseResult') || 'null');
 
-    let prompt = `Alum: ${profile.name}\n`;
+    // 1. LLM Instructions
+    let prompt = `You are an expert email writer. Generate a personalized cold email to an alumni from my college.\n`;
+    prompt += `Use the information under "Alumni Information" to address the recipient and reference their background.\n`;
+    prompt += `Incorporate relevant details from "Resume Education Information" to highlight shared experiences or interests, and connect them to the alumni's current role if possible.\n`;
+    prompt += `Be concise, professional, and engaging.\n\n`;
 
-    // Add profile information
+    // 2. Alumni Information Section
+    prompt += `Alumni Information:\n`;
+    prompt += `Name: ${profile.name}\n`;
     if (profile?.title && profile.title !== '(not found)') {
       prompt += `Title: ${profile.title}\n`;
     }
-
     if (profile?.employer && profile.employer !== '(not found)') {
       prompt += `Employer: ${profile.employer}\n`;
     }
-
     if (profile?.location && profile.location !== '(not found)') {
       prompt += `Location: ${profile.location}\n`;
     }
-
     // Combine emails from both sources
     const allEmails = new Set([
       ...(emails || []),
@@ -148,37 +151,22 @@ function App() {
     if (allEmails.size > 0) {
       prompt += `Emails: ${Array.from(allEmails).join(', ')}\n`;
     }
-
-    // Combine phone numbers from resume
     if (resumeData?.profile?.phones?.length) {
       prompt += `Phone Numbers: ${resumeData.profile.phones.join(', ')}\n`;
     }
-
-    // Add academic information from both sources
-    prompt += `\nAcademic Background:\n`;
-    
-    // Add alumni academic data
+    // Academic info from alumni
     if (academic?.length) {
-      prompt += `Penn Alumni Information:\n`;
       academic.forEach((entry, i) => {
         prompt += `School ${i + 1}: ${entry.school}\n`;
-        if (entry['Class Year']) {
-          prompt += `Class Year: ${entry['Class Year']}\n`;
-        }
-        if (entry['Degree']) {
-          prompt += `Degree: ${entry['Degree']}\n`;
-        }
-        if (entry['Major(s)']) {
-          prompt += `Major(s): ${entry['Major(s)']}\n`;
-        }
-        if (entry['Minor(s)']) {
-          prompt += `Minor(s): ${entry['Minor(s)']}\n`;
-        }
+        if (entry['Class Year']) prompt += `Class Year: ${entry['Class Year']}\n`;
+        if (entry['Degree']) prompt += `Degree: ${entry['Degree']}\n`;
+        if (entry['Major(s)']) prompt += `Major(s): ${entry['Major(s)']}\n`;
+        if (entry['Minor(s)']) prompt += `Minor(s): ${entry['Minor(s)']}\n`;
         prompt += `\n`;
       });
     }
 
-    // Add resume education data
+    // 3. Resume Education Information Section
     if (resumeData?.education?.length) {
       prompt += `Resume Education Information:\n`;
       resumeData.education.forEach((entry, i) => {
@@ -190,7 +178,7 @@ function App() {
       });
     }
 
-    // Add AI insights if available
+    // 4. AI Insights (optional)
     if (aiOverview?.length) {
       prompt += `\nAI Insights: ${aiOverview.join('; ')}`;
     }
