@@ -50,24 +50,49 @@ function extractSections(text) {
     'AWARDS',
     'SKILLS'
   ];
-  // Build regex for section headers
-  const sectionRegex = new RegExp(`^(${sectionOrder.join('|')})`, 'i');
+  const sectionRegex = new RegExp(`^(${sectionOrder.join('|')})$`, 'i');
 
-  // Split text into lines
-  const lines = text.split(/\n|\r/).map(l => l.trim()).filter(Boolean);
+  // Split on newlines only (not spaces)
+  let lines = text
+    .replace(/\\n/g, '\n')
+    .split('\n')
+    .map(l => l.trim())
+    .filter(Boolean);
+
+  // Merge short lines with the next line if not a section or bullet
+  let mergedLines = [];
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+    // If it's a section header or bullet, keep as is
+    if (
+      sectionRegex.test(line) ||
+      /^[•●-]/.test(line) ||
+      /^[A-Z ]+:$/.test(line)
+    ) {
+      mergedLines.push(line);
+    } else if (line.length < 30 && i + 1 < lines.length) {
+      // Merge with next line
+      mergedLines.push(line + ' ' + lines[i + 1]);
+      i++; // Skip next line
+    } else {
+      mergedLines.push(line);
+    }
+  }
+
+  // Now, group lines into sections
   const sections = {};
   let currentSection = 'HEADER';
   sections[currentSection] = [];
-
-  for (let line of lines) {
+  mergedLines.forEach(line => {
     const headerMatch = line.match(sectionRegex);
     if (headerMatch) {
       currentSection = headerMatch[1].toUpperCase();
       if (!sections[currentSection]) sections[currentSection] = [];
-      continue;
+      return;
     }
     sections[currentSection].push(line);
-  }
+  });
+
   return sections;
 }
 
