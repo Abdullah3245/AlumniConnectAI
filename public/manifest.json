@@ -3,7 +3,12 @@
   "name": "AlumniConnect",
   "version": "1.0",
   "description": "An extension to connect with Penn alumni and generate cold emails.",
-  "permissions": ["storage", "activeTab", "scripting", "tabs"],
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "tabs"
+  ],
   "host_permissions": [
     "*://*.upenn.edu/*"
   ],
@@ -13,17 +18,35 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_icon": "assets/AlumniConnectIcon.png"
+    "default_icon": {
+      "16": "assets/AlumniConnectIcon.png",
+      "48": "assets/AlumniConnectIcon.png",
+      "128": "assets/AlumniConnectIcon.png"
+    }
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["webscraper.js"]
+      "js": [
+        "pdf.min.js",
+        "pdf.worker.min.js",
+        "webscraper.js",
+        "parseResume.js"
+      ],
+      "run_at": "document_idle"
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["popup.html", "popup.js", "popup.css", "config.js"],
+      "resources": [
+        "popup.html",
+        "popup.js",
+        "popup.css",
+        "config.js",
+        "parseResume.js",
+        "pdf.min.js",
+        "pdf.worker.min.js"
+      ],
       "matches": ["<all_urls>"]
     }
   ],

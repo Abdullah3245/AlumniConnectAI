@@ -1,7 +1,6 @@
 // Project: AlumniConnectAI
 import { useState, useEffect, useRef } from "react";
 import './App.css';
-import WebScraper from "../public/webscraper";
 
 function App() {
   const [open, setOpen] = useState(false);
@@ -124,45 +123,78 @@ function App() {
     if (!scrapedData) return;
 
     const { profile, emails, academic } = scrapedData;
+    const resumeData = JSON.parse(localStorage.getItem('resumeParseResult') || 'null');
 
-    let prompt = `Alum: ${profile.name}\n`;
+    // 1. LLM Instructions
+    let prompt = `You are an expert email writer. Generate a personalized cold email to an alumni from my college.\n`;
+    prompt += `Use the information under "Alumni Information" to address the recipient and reference their background.\n`;
+    prompt += `Incorporate relevant details from "Resume Education Information" to highlight shared experiences or interests, and connect them to the alumni's current role if possible.\n`;
+    prompt += `Be concise, professional, and engaging.\n\n`;
 
+    // 2. Alumni Information Section
+    prompt += `Alumni Information:\n`;
+    prompt += `Name: ${profile.name}\n`;
     if (profile?.title && profile.title !== '(not found)') {
       prompt += `Title: ${profile.title}\n`;
     }
-
     if (profile?.employer && profile.employer !== '(not found)') {
       prompt += `Employer: ${profile.employer}\n`;
     }
-
     if (profile?.location && profile.location !== '(not found)') {
       prompt += `Location: ${profile.location}\n`;
     }
-
-    if (emails?.length) {
-      prompt += `Emails: ${emails.join(', ')}\n`;
+    // Combine emails from both sources
+    const allEmails = new Set([
+      ...(emails || []),
+      ...(resumeData?.profile?.emails || [])
+    ]);
+    if (allEmails.size > 0) {
+      prompt += `Emails: ${Array.from(allEmails).join(', ')}\n`;
     }
-
+    if (resumeData?.profile?.phones?.length) {
+      prompt += `Phone Numbers: ${resumeData.profile.phones.join(', ')}\n`;
+    }
+    // Academic info from alumni
     if (academic?.length) {
-      prompt += `\nAcademic Background:\n`;
       academic.forEach((entry, i) => {
         prompt += `School ${i + 1}: ${entry.school}\n`;
-        if (entry['Class Year']) {
-          prompt += `Class Year: ${entry['Class Year']}\n`;
-        }
-        if (entry['Degree']) {
-          prompt += `Degree: ${entry['Degree']}\n`;
-        }
-        if (entry['Major(s)']) {
-          prompt += `Major(s): ${entry['Major(s)']}\n`;
-        }
-        if (entry['Minor(s)']) {
-          prompt += `Minor(s): ${entry['Minor(s)']}\n`;
-        }
+        if (entry['Class Year']) prompt += `Class Year: ${entry['Class Year']}\n`;
+        if (entry['Degree']) prompt += `Degree: ${entry['Degree']}\n`;
+        if (entry['Major(s)']) prompt += `Major(s): ${entry['Major(s)']}\n`;
+        if (entry['Minor(s)']) prompt += `Minor(s): ${entry['Minor(s)']}\n`;
         prompt += `\n`;
       });
     }
 
+    // 3. Resume Information Sections (from improved parser)
+    if (resumeData?.sections) {
+      prompt += `Resume Information:\n`;
+      // List the order you want to display sections
+      const sectionOrder = [
+        'HEADER',
+        'EDUCATION',
+        'WORK EXPERIENCE',
+        'LEADERSHIP',
+        'PROJECTS',
+        'PUBLICATIONS',
+        'AWARDS',
+        'SKILLS'
+      ];
+      sectionOrder.forEach(section => {
+        if (resumeData.sections[section] && resumeData.sections[section].length) {
+          // Skip HEADER if you don't want to show it
+          if (section !== 'HEADER') {
+            prompt += `  ${section[0] + section.slice(1).toLowerCase().replace(/_/g, ' ')}:\n`;
+          }
+          resumeData.sections[section].forEach(line => {
+            prompt += `    - ${line}\n`;
+          });
+          prompt += `\n`;
+        }
+      });
+    }
+
+    // 4. AI Insights (optional)
     if (aiOverview?.length) {
       prompt += `\nAI Insights: ${aiOverview.join('; ')}`;
     }
@@ -185,8 +217,10 @@ function App() {
     setAlum("");
     setScrapedData(null);
     setAIOverview(null);
+    setResumeName("");
     localStorage.removeItem('fullScrapeResult');
     localStorage.removeItem('aiOverview');
+    localStorage.removeItem('uploadedResumeName');
   };
 
   const handleUpload = (e) => {
@@ -195,24 +229,28 @@ function App() {
 
     setResumeFile(file);
     setResumeName(file.name);
+    localStorage.setItem('uploadedResumeName', file.name);
 
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const content = reader.result;
-      chrome.storage.local.get(["resumeList"], (result) => {
-        const oldList = result.resumeList || [];
-        const newEntry = { name: file.name, content };
-        chrome.storage.local.set({ resumeList: [...oldList, newEntry] });
-      });
-    };
-    reader.readAsText(file);
+    // Call the resume parser!
+    if (window.parseResume) {
+      window.parseResume(file)
+        .then(() => {
+          // Optionally, you can show a toast or update state here
+          console.log('Resume parsed and saved to localStorage');
+        })
+        .catch((err) => {
+          console.error('Failed to parse resume:', err);
+        });
+    } else {
+      console.error('parseResume function not found on window');
+    }
   };
 
   // Load saved data on component mount
   useEffect(() => {
     const savedData = localStorage.getItem('fullScrapeResult');
     const savedAIOverview = localStorage.getItem('aiOverview');
+    const savedResumeName = localStorage.getItem('uploadedResumeName');
 
     if (savedData) {
       const parsedData = JSON.parse(savedData);
@@ -222,6 +260,10 @@ function App() {
 
     if (savedAIOverview) {
       setAIOverview(JSON.parse(savedAIOverview));
+    }
+
+    if (savedResumeName) {
+      setResumeName(savedResumeName);
     }
   }, []);
 
