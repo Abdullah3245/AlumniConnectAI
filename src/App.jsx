@@ -124,9 +124,11 @@ function App() {
     if (!scrapedData) return;
 
     const { profile, emails, academic } = scrapedData;
+    const resumeData = JSON.parse(localStorage.getItem('resumeParseResult') || 'null');
 
     let prompt = `Alum: ${profile.name}\n`;
 
+    // Add profile information
     if (profile?.title && profile.title !== '(not found)') {
       prompt += `Title: ${profile.title}\n`;
     }
@@ -139,12 +141,26 @@ function App() {
       prompt += `Location: ${profile.location}\n`;
     }
 
-    if (emails?.length) {
-      prompt += `Emails: ${emails.join(', ')}\n`;
+    // Combine emails from both sources
+    const allEmails = new Set([
+      ...(emails || []),
+      ...(resumeData?.profile?.emails || [])
+    ]);
+    if (allEmails.size > 0) {
+      prompt += `Emails: ${Array.from(allEmails).join(', ')}\n`;
     }
 
+    // Combine phone numbers from resume
+    if (resumeData?.profile?.phones?.length) {
+      prompt += `Phone Numbers: ${resumeData.profile.phones.join(', ')}\n`;
+    }
+
+    // Add academic information from both sources
+    prompt += `\nAcademic Background:\n`;
+    
+    // Add alumni academic data
     if (academic?.length) {
-      prompt += `\nAcademic Background:\n`;
+      prompt += `Penn Alumni Information:\n`;
       academic.forEach((entry, i) => {
         prompt += `School ${i + 1}: ${entry.school}\n`;
         if (entry['Class Year']) {
@@ -163,6 +179,19 @@ function App() {
       });
     }
 
+    // Add resume education data
+    if (resumeData?.education?.length) {
+      prompt += `Resume Education Information:\n`;
+      resumeData.education.forEach((entry, i) => {
+        prompt += `Institution ${i + 1}: ${entry.institution}\n`;
+        if (entry.details?.length) {
+          prompt += `Details:\n${entry.details.join('\n')}\n`;
+        }
+        prompt += `\n`;
+      });
+    }
+
+    // Add AI insights if available
     if (aiOverview?.length) {
       prompt += `\nAI Insights: ${aiOverview.join('; ')}`;
     }
