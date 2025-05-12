@@ -217,8 +217,10 @@ function App() {
     setAlum("");
     setScrapedData(null);
     setAIOverview(null);
+    setResumeName("");
     localStorage.removeItem('fullScrapeResult');
     localStorage.removeItem('aiOverview');
+    localStorage.removeItem('uploadedResumeName');
   };
 
   const handleUpload = (e) => {
@@ -227,6 +229,7 @@ function App() {
 
     setResumeFile(file);
     setResumeName(file.name);
+    localStorage.setItem('uploadedResumeName', file.name);
 
     // Call the resume parser!
     if (window.parseResume) {
@@ -247,6 +250,7 @@ function App() {
   useEffect(() => {
     const savedData = localStorage.getItem('fullScrapeResult');
     const savedAIOverview = localStorage.getItem('aiOverview');
+    const savedResumeName = localStorage.getItem('uploadedResumeName');
 
     if (savedData) {
       const parsedData = JSON.parse(savedData);
@@ -256,6 +260,10 @@ function App() {
 
     if (savedAIOverview) {
       setAIOverview(JSON.parse(savedAIOverview));
+    }
+
+    if (savedResumeName) {
+      setResumeName(savedResumeName);
     }
   }, []);
 
