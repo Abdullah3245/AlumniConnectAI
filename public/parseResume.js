@@ -1,5 +1,5 @@
 // PDF.js worker source - we'll need to include this in manifest.json
-const PDFJS_WORKER_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const PDFJS_WORKER_SRC = chrome.runtime.getURL('pdf.worker.min.js');
 
 // Initialize PDF.js
 pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_SRC;
