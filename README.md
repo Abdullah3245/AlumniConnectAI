@@ -49,3 +49,16 @@ A Chrome extension that automates alumni outreach by scraping alumni data and se
 
   ## Landing Page
   https://chrome-glow-landing.lovable.app/
+
+## Advanced Resume Upload & Parsing
+
+- Click the 'Upload Resume' button in the popup to upload your PDF resume.
+- The PDF is stored in Chrome local storage as a base64 string.
+- The extension uses pdf.js to extract text from the PDF and compromise.js for advanced NLP parsing.
+- Parsed sections include: Education, Work Experience, Skills, Extracurriculars, Projects, Certifications, Awards, and more.
+- The parsed data is stored as a JSON object in Chrome local storage (`resumeJSON`).
+- Every new upload overwrites the previous resume and parsed data.
+
+### Libraries Used
+- [pdf.js](https://mozilla.github.io/pdf.js/) for PDF parsing
+- [compromise.js](https://github.com/spencermountain/compromise) for NLP entity extraction

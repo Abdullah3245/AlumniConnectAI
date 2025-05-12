@@ -20,3 +20,27 @@
     padding: 1.5rem;
     gap: 1rem;
   }
+
+#upload-btn, #scrape-btn, #generate-btn, #copy-btn {
+  margin: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+}
+#upload-btn {
+  background: #fff;
+  color: #a15c7a;
+}
+#scrape-btn, #generate-btn {
+  background: #d48ca6;
+  color: #fff;
+}
+#copy-btn {
+  background: #4b466e;
+  color: #fff;
+}
+#resume-status {
+  margin: 8px 0;
+  font-size: 1em;
+  color: #4b466e;
+}

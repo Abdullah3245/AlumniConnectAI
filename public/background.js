@@ -39,3 +39,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 // Export the function
 export { getAIOverview };
+
+// No changes needed for background.js for resume upload and parsing logic.
+// This file is ready for future background features.

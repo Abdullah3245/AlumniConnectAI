@@ -6,9 +6,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="popup.css" />
   <link rel="stylesheet" href="assets/popup.css" />
+  <style>
+    body { background: #c6f2d1; font-family: sans-serif; }
+    #upload-btn, #scrape-btn, #generate-btn, #copy-btn {
+      margin: 8px; padding: 8px 16px; border-radius: 8px; border: none;
+    }
+    #upload-btn { background: #fff; color: #a15c7a; }
+    #scrape-btn, #generate-btn { background: #d48ca6; color: #fff; }
+    #copy-btn { background: #4b466e; color: #fff; }
+    #resume-status { margin: 8px 0; }
+  </style>
 </head>
 <body>
+  <img src="assets/AlumniConnectIcon.png" alt="Logo" style="width:80px;display:block;margin:auto;">
+  <h2 style="background:#d48ca6;color:#fff;padding:10px;border-radius:10px;">AlumniConnectAI</h2>
+  <input type="file" id="resume-upload" accept="application/pdf" style="display:none" />
+  <button id="upload-btn">Upload Resume</button>
+  <div id="resume-status"></div>
   <div id="root"></div>
+  <script src="pdf.min.js"></script>
+  <script src="compromise.min.js"></script>
   <script type="module" src="popup.js"></script>
 </body>
 </html>
