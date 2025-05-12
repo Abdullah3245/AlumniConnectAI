@@ -166,15 +166,31 @@ function App() {
       });
     }
 
-    // 3. Resume Education Information Section
-    if (resumeData?.education?.length) {
-      prompt += `Resume Education Information:\n`;
-      resumeData.education.forEach((entry, i) => {
-        prompt += `Institution ${i + 1}: ${entry.institution}\n`;
-        if (entry.details?.length) {
-          prompt += `Details:\n${entry.details.join('\n')}\n`;
+    // 3. Resume Information Sections (from improved parser)
+    if (resumeData?.sections) {
+      prompt += `Resume Information:\n`;
+      // List the order you want to display sections
+      const sectionOrder = [
+        'HEADER',
+        'EDUCATION',
+        'WORK EXPERIENCE',
+        'LEADERSHIP',
+        'PROJECTS',
+        'PUBLICATIONS',
+        'AWARDS',
+        'SKILLS'
+      ];
+      sectionOrder.forEach(section => {
+        if (resumeData.sections[section] && resumeData.sections[section].length) {
+          // Skip HEADER if you don't want to show it
+          if (section !== 'HEADER') {
+            prompt += `  ${section[0] + section.slice(1).toLowerCase().replace(/_/g, ' ')}:\n`;
+          }
+          resumeData.sections[section].forEach(line => {
+            prompt += `    - ${line}\n`;
+          });
+          prompt += `\n`;
         }
-        prompt += `\n`;
       });
     }
 

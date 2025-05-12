@@ -38,39 +38,37 @@ function extractPhoneNumbers(text) {
   return [...new Set(text.match(phoneRegex) || [])];
 }
 
-// Helper function to extract education information
-function extractEducation(text) {
-  const educationKeywords = [
-    'University', 'College', 'School', 'Institute', 'Bachelor', 'Master', 'PhD',
-    'B.S.', 'M.S.', 'B.A.', 'M.A.', 'B.E.', 'M.E.', 'MBA', 'JD', 'MD'
+// Helper function to extract sections from resume text
+function extractSections(text) {
+  // Section headers to look for
+  const sectionOrder = [
+    'EDUCATION',
+    'WORK EXPERIENCE',
+    'LEADERSHIP',
+    'PROJECTS',
+    'PUBLICATIONS',
+    'AWARDS',
+    'SKILLS'
   ];
+  // Build regex for section headers
+  const sectionRegex = new RegExp(`^(${sectionOrder.join('|')})`, 'i');
 
-  const lines = text.split('\n');
-  const educationEntries = [];
-  let currentEntry = null;
+  // Split text into lines
+  const lines = text.split(/\n|\r/).map(l => l.trim()).filter(Boolean);
+  const sections = {};
+  let currentSection = 'HEADER';
+  sections[currentSection] = [];
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    
-    // Check if line contains education keywords
-    if (educationKeywords.some(keyword => line.includes(keyword))) {
-      if (currentEntry) {
-        educationEntries.push(currentEntry);
-      }
-      currentEntry = {
-        institution: line,
-        details: []
-      };
-    } else if (currentEntry && line) {
-      currentEntry.details.push(line);
+  for (let line of lines) {
+    const headerMatch = line.match(sectionRegex);
+    if (headerMatch) {
+      currentSection = headerMatch[1].toUpperCase();
+      if (!sections[currentSection]) sections[currentSection] = [];
+      continue;
     }
+    sections[currentSection].push(line);
   }
-
-  if (currentEntry) {
-    educationEntries.push(currentEntry);
-  }
-
-  return educationEntries;
+  return sections;
 }
 
 // Main function to parse resume
@@ -81,7 +79,7 @@ async function parseResume(pdfFile) {
     // Extract basic information
     const emails = extractEmails(text);
     const phones = extractPhoneNumbers(text);
-    const education = extractEducation(text);
+    const sections = extractSections(text);
 
     // Create structured data object
     const resumeData = {
@@ -90,7 +88,7 @@ async function parseResume(pdfFile) {
         phones: phones,
         // Add more profile fields as needed
       },
-      education: education,
+      sections: sections, // Store all parsed sections as arrays of lines
       rawText: text // Store raw text for potential future processing
     };
 
