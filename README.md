@@ -1,10 +1,10 @@
-# AlumniConnectAI
+# 🌳 AlumniConnectAI - Smarter Outreach Built on AI
 
-A Chrome extension that automates alumni outreach by scraping alumni data and sending personalized emails.
+AlumniConnectAI is a Chrome extension designed to streamline the process of cold emailing Penn Alumni. It scrapes needed information from the alumni database and integrates it with AI insights and information from your resume to create a tailormade LLM prompt for cold emailing.
 
-## Features
+## ⚡ Features
 
-- Automated alumni data scraping
+- **Automated alumni data scraping**: Scrape all relevant information about an alum with the click of a button
 - Personalized email templates
 - Email tracking and history
 - Bulk email sending
