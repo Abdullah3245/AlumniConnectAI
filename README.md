@@ -2,15 +2,18 @@
 
 AlumniConnectAI is a Chrome extension designed to streamline the process of cold emailing Penn Alumni. It scrapes needed information from the alumni database and integrates it with AI insights and information from your resume to create a tailormade LLM prompt for cold emailing.
 
+---
+
 ## ⚡ Features
 
-- **Automated alumni data scraping**: Scrape all relevant information about an alum with the click of a button
-- Personalized email templates
-- Email tracking and history
-- Bulk email sending
-- Easy-to-use interface
+- ✂️ **Automated Scraping**: Scrape all relevant information about an alum with the click of a button
+- 🧠 **AI Insights**: Pulls additional AI insights from across the internet
+- 📝 **Resume Upload**: Upload your resume to further tailor prompts
+- 📝 **Prompt Generation**: Instantly generate LLM prompts to make the perfect cold email
 
-## Installation
+---
+
+## 📦 Installation
 
 1. Clone this repository locally
 2. cd to local clone
@@ -19,8 +22,11 @@ AlumniConnectAI is a Chrome extension designed to streamline the process of cold
 5. Open Chrome and go to `chrome://extensions/`
 6. Enable "Developer mode"
 7. Click "Load unpacked" and select dist folder in the extension directory
+8. Register for an account at www.serpapi.com and paste your API key into background.js
 
-## Usage
+---
+
+## 📩 Usage
 
 1. Click the extension icon in your Chrome toolbar
 2. Configure your email settings
@@ -29,23 +35,16 @@ AlumniConnectAI is a Chrome extension designed to streamline the process of cold
 5. Review and customize email templates
 6. Send personalized emails to alumni
 
-## Development
+---
 
-### Project Structure
+## 👨‍💻 Authors
 
-- `manifest.json` - Extension configuration
-- `popup.html` - Main extension interface
-- `popup.js` - Popup functionality
-- `content.js` - Content script for scraping
-- `background.js` - Background tasks
-- `style.css` - Extension styling
+- Muhammad Abdullah Goher (Scraping)
+- Alan Wu (AI Insights)
+- Adi Sirohi (Resume Upload & Prompt Formatting)
+- Caia Gelli (Front End)
 
-## Authors
+---
 
-- Muhammad Abdullah Goher
-- Alan Wu
-- Adi Sirohi
-- Caia Gelli
-
-  ## Landing Page
-  https://chrome-glow-landing.lovable.app/
+## Landing Page
+https://chrome-glow-landing.lovable.app/
