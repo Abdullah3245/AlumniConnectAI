@@ -13,16 +13,13 @@ async function getAIOverview(query) {
                     .then(response => response.json())
                     .then(data => {
                         const textBlocks = data["ai_overview"]["text_blocks"];
-                        const extractedText = textBlocks.map(block => {
-                            if (block.type === "paragraph") {
-                                return block.snippet;
-                            } else if (block.type === "list") {
-                                return block.list.map(item => item.snippet).join('\n');
-                            }
-                            return '';
-                        }).filter(text => text !== '').join('\n\n');
+                        // Extract only the snippet_highlighted_words from paragraphs that have them
+                        const highlightedWords = textBlocks
+                            .filter(block => block.type === "paragraph" && block.snippet_highlighted_words)
+                            .map(block => block.snippet_highlighted_words)
+                            .flat(); // Flatten the array since each block might have multiple highlighted words
                         
-                        resolve(extractedText);
+                        resolve(highlightedWords);
                     })
                     .catch(error => reject(error));
             })
