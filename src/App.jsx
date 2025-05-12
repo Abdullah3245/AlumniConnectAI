@@ -163,7 +163,9 @@ function App() {
       });
     }
 
-    prompt += `AI Insights: ${aiOverview?.insights || 'No AI insights available'}`;
+    if (aiOverview?.length) {
+      prompt += `\nAI Insights: ${aiOverview.join('; ')}`;
+    }
 
     setPromptText(prompt);
   };
