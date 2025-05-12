@@ -283,7 +283,7 @@ function App() {
           onClick={() => setOpen((o) => !o)}
           aria-label="toggle sidebar"
         >
-          {open ? "✕" : "▶"}
+          {open ? "✕" : "🕒"}
         </button>
       </div>
 
