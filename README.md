@@ -47,4 +47,4 @@ AlumniConnectAI is a Chrome extension designed to streamline the process of cold
 ---
 
 ## Landing Page
-https://chrome-glow-landing.lovable.app/
+https://alumniconnectai.lovable.app/
